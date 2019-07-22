@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor", "TheInvincibleTraderExpertAdvisor\InvincibleTraderExpertAdvisor.csproj", "{043FDDB0-B937-454D-8885-4313CA0AD96E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor", "InvincibleTraderExpertAdvisor\InvincibleTraderExpertAdvisor.csproj", "{043FDDB0-B937-454D-8885-4313CA0AD96E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.UnitTests", "TheInvincibleTraderExpertAdvisor.UnitTests\InvincibleTraderExpertAdvisor.UnitTests.csproj", "{529A4A49-66E1-451E-A3A7-7444366ECBBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.UnitTests", "InvincibleTraderExpertAdvisor.UnitTests\InvincibleTraderExpertAdvisor.UnitTests.csproj", "{529A4A49-66E1-451E-A3A7-7444366ECBBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.DbTests", "TheInvincibleTraderExpertAdvisor.DbTests\InvincibleTraderExpertAdvisor.DbTests.csproj", "{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.DbTests", "InvincibleTraderExpertAdvisor.DbTests\InvincibleTraderExpertAdvisor.DbTests.csproj", "{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderHeartbeatPinger", "TheInvincibleTraderHeartbeatPinger\InvincibleTraderHeartbeatPinger.csproj", "{E0304892-1601-4992-AE0B-24326BDF3418}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderHeartbeatPinger", "InvincibleTraderHeartbeatPinger\InvincibleTraderHeartbeatPinger.csproj", "{E0304892-1601-4992-AE0B-24326BDF3418}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
