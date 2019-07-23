@@ -1,0 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SQLite;
+using System.Text;
+
+namespace InvincibleTraderExpertAdvisor.DbTests
+{
+    public class SQLiteDbHelper
+    {
+        public static IEnumerable<Dictionary<string, object>> Query(string dbFile, string sqlQuery)
+        {
+            var builder = new SQLiteConnectionStringBuilder() { DataSource = dbFile };
+            var connection = new SQLiteConnection(builder.ConnectionString);
+
+            connection.Open();
+
+            try
+            {
+                using (var selectCommand = connection.CreateCommand())
+                {
+                    ;
+
+                    selectCommand.CommandText = sqlQuery;
+
+
+                    using (var reader = selectCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var fields = new Dictionary<string, object>();
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                fields[reader.GetName(i)] = reader.GetValue(i);
+                            }
+
+                            yield return fields;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public static void NonQueryCommand(string dbFile, string sqlCommand)
+        {
+            var builder = new SQLiteConnectionStringBuilder() { DataSource = dbFile };
+            var connection = new SQLiteConnection(builder.ConnectionString);
+
+            connection.Open();
+
+            try
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = sqlCommand;
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+    }
+}

@@ -1,11 +1,8 @@
 using System;
-using Xunit;
-using InvincibleTraderExpertAdvisor;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
+using Xunit;
 
-namespace InvincibleTraderExpertAdvisor.DbTests
+namespace InvincibleTraderExpertAdvisor.IntegrationTests
 {
     public class BasicTests
     {
@@ -20,7 +17,7 @@ namespace InvincibleTraderExpertAdvisor.DbTests
 
             ea.WrapUp();
 
-            Thread.Sleep(60000);            
+            Thread.Sleep(60000);
         }
     }
 }

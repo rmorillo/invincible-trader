@@ -9,9 +9,9 @@ namespace InvincibleTraderExpertAdvisor
     {
         private SQLiteConnection _connection;
 
-        public SQLiteRegistry(string dbPath)
+        public SQLiteRegistry(string dbPath, string dbName = "titea_registry.db")
         {
-            var builder = new SQLiteConnectionStringBuilder() { DataSource = $@"{dbPath}\titea_registry.db" };
+            var builder = new SQLiteConnectionStringBuilder() { DataSource = $@"{dbPath}\{dbName}" };
             _connection = new SQLiteConnection(builder.ConnectionString);
             
             Uri = dbPath;
@@ -31,7 +31,7 @@ namespace InvincibleTraderExpertAdvisor
 
         public string Uri { get; private set; }        
 
-        public (bool success, string message, int currencyPairId) GetCurrencyPairIdByNme(string currencyPairName)
+        public (bool success, string message, int currencyPairId) GetCurrencyPairIdByName(string currencyPairName)
         {
             _connection.Open();
 
@@ -52,12 +52,12 @@ namespace InvincibleTraderExpertAdvisor
                 }
                 else
                 {
-                    message = $"Currency Pair Id '{currencyPairId}' doesn't exisit";
+                    message = $"Currency Pair with name '{currencyPairName}' doesn't exisit";
                 }
 
                 if (reader.Read())
                 {
-                    message = $"More than 1 Currency Pair Id '{currencyPairId}' are found";
+                    message = $"More than 1 Currency Pair names '{currencyPairName}' are found";
                 }
             }
 
@@ -70,64 +70,69 @@ namespace InvincibleTraderExpertAdvisor
         {
             _connection.Open();
 
-            var query = _connection.CreateCommand();
-            query.CommandText = "SELECT COUNT(*) FROM Sessions WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId";
-            query.Parameters.AddWithValue("$currencyPairId", currencyPair);
-            query.Parameters.AddWithValue("$sessionId", sessionId);
-            query.Parameters.AddWithValue("$accountId", accountId);
-
             var count = 0;
 
-            using (var reader = query.ExecuteReader())
+            using (var query = _connection.CreateCommand())
             {
-                if (reader.Read())
+                query.CommandText = "SELECT COUNT(*) FROM Sessions WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId";
+                query.Parameters.AddWithValue("$currencyPairId", currencyPair);
+                query.Parameters.AddWithValue("$sessionId", sessionId);
+                query.Parameters.AddWithValue("$accountId", accountId);                
+
+                using (var reader = query.ExecuteReader())
                 {
-                    count = reader.GetInt32(0);
-                }             
+                    if (reader.Read())
+                    {
+                        count = reader.GetInt32(0);
+                    }
+                }
             }
 
-            var command = _connection.CreateCommand();
+            using (var command = _connection.CreateCommand())
+            {
+                if (count == 0)
+                {
+                    command.CommandText = SQLiteRegistryCommands.Session_InsertNewRow;
+                    command.Parameters.AddWithValue("$commandPortNumber", portNumber);
+                    command.Parameters.AddWithValue("$accountId", accountId);
+                    command.Parameters.AddWithValue("$sessionId", sessionId);
+                    command.Parameters.AddWithValue("$currencyPairId", currencyPair);
+                }
+                else
+                {
+                    command.CommandText = "UPDATE Sessions SET commandPortNumber=$commandPortNumber, keepAliveStatus = 0, dtUpdated = $dtUpdated WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId";
+                    command.Parameters.AddWithValue("$commandPortNumber", portNumber);
+                    command.Parameters.AddWithValue("$dtUpdated", DateTime.Now);
+                    command.Parameters.AddWithValue("$sessionId", sessionId);
+                    command.Parameters.AddWithValue("$currencyPairId", currencyPair);
 
-            if (count == 0)
-            {                
-                command.CommandText = SQLiteRegistryCommands.Session_InsertNewRow;
-                command.Parameters.AddWithValue("$commandPortNumber", portNumber);
-                command.Parameters.AddWithValue("$accountId", accountId);
-                command.Parameters.AddWithValue("$sessionId", sessionId);
-                command.Parameters.AddWithValue("$currencyPairId", currencyPair);                
+                }
+                command.ExecuteNonQuery();
             }
-            else
-            {                
-                command.CommandText = "UPDATE Sessions SET commandPortNumber=$commandPortNumber, keepAliveStatus = 0, dtUpdated = $dtUpdated WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId";
-                command.Parameters.AddWithValue("$commandPortNumber", portNumber);
-                command.Parameters.AddWithValue("$dtUpdated", DateTime.Now);
-                command.Parameters.AddWithValue("$sessionId", sessionId);
-                command.Parameters.AddWithValue("$currencyPairId", currencyPair);
-                
-            }
-
-            command.ExecuteNonQuery();            
+            
             _connection.Close();
             return (true, null);
         }
 
-        public (bool success, int portNumber) GetAssignedPortNumber(string accountId, int sessionId, int currencyPair)
+        public (bool success, int portNumber) ReuseCommandPortNumber(string accountId, int sessionId, int currencyPair)
         {
             _connection.Open();
 
-            var query = _connection.CreateCommand();
-            query.CommandText = SQLiteRegistryCommands.Sessions_QueryAssignedPortNumberIfAvailable;
-            query.Parameters.AddWithValue("$currencyPairId", currencyPair);
-            query.Parameters.AddWithValue("$sessionId", sessionId);
-            query.Parameters.AddWithValue("$accountId", accountId);
-
             var portNumber = 0;
 
-            using (var reader = query.ExecuteReader())
+            using (var query = _connection.CreateCommand())
             {
-                if (reader.Read())
+                query.CommandText = SQLiteRegistryCommands.Sessions_QueryCommandPortNumberIfAvailable;
+                query.Parameters.AddWithValue("$currencyPairId", currencyPair);
+                query.Parameters.AddWithValue("$sessionId", sessionId);
+                query.Parameters.AddWithValue("$accountId", accountId);                
+
+                using (var reader = query.ExecuteReader())
                 {
-                    portNumber = reader.GetInt32(0);
+                    if (reader.Read())
+                    {
+                        portNumber = reader.GetInt32(0);
+                    }
                 }
             }
 
@@ -140,17 +145,19 @@ namespace InvincibleTraderExpertAdvisor
         {
             _connection.Open();
 
-            var query = _connection.CreateCommand();
-            query.CommandText = SQLiteRegistryCommands.Sessions_QueryAvailablePortNumbersWithException;
-            query.Parameters.AddWithValue("$exceptThisPortNumber", exceptThisPortNumber);
-
             var portNumbers = new List<int>();
 
-            using (var reader = query.ExecuteReader())
+            using (var query = _connection.CreateCommand())
             {
-                while (reader.Read())
+                query.CommandText = SQLiteRegistryCommands.Sessions_QueryAvailablePortNumbersWithException;
+                query.Parameters.AddWithValue("$exceptThisPortNumber", exceptThisPortNumber);                
+
+                using (var reader = query.ExecuteReader())
                 {
-                    portNumbers.Add(reader.GetInt32(0));
+                    while (reader.Read())
+                    {
+                        portNumbers.Add(reader.GetInt32(0));
+                    }
                 }
             }
 

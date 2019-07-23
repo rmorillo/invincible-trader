@@ -12,7 +12,7 @@ namespace InvincibleTraderExpertAdvisor
         public const string Session_InsertNewRow =
             "INSERT INTO Sessions(accountId, sessionId, currencyPairId, commandPortNumber) VALUES($accountId, $sessionId, $currencyPairId, $commandPortNumber)";
 
-        public const string Sessions_QueryAssignedPortNumberIfAvailable =
+        public const string Sessions_QueryCommandPortNumberIfAvailable =
             "SELECT commandPortNumber FROM Sessions " +
                 "WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId " +
                     "AND (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) > 10";

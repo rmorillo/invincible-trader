@@ -49,7 +49,7 @@ namespace InvincibleTraderExpertAdvisor
 
         private void ResolveCurrencyPairId(string currencyPairName)
         {
-            var result = _centralRegistry.GetCurrencyPairIdByNme(currencyPairName);
+            var result = _centralRegistry.GetCurrencyPairIdByName(currencyPairName);
 
             if (result.success)
             {
@@ -63,7 +63,7 @@ namespace InvincibleTraderExpertAdvisor
 
         private void StartBeacon()
         {           
-            var assignedPortNumberResult = _centralRegistry.GetAssignedPortNumber(_accountId, _sessionId, _currencyPairId);
+            var assignedPortNumberResult = _centralRegistry.ReuseCommandPortNumber(_accountId, _sessionId, _currencyPairId);
             int[] availablePortNumbers = null;
             bool hasAvailablePortNumbers = false;
 
