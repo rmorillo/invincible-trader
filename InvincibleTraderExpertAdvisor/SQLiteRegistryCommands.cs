@@ -10,20 +10,31 @@ namespace InvincibleTraderExpertAdvisor
             "CREATE TABLE IF NOT EXISTS Sessions(accountId TEXT NOT NULL, sessionId INTEGER NOT NULL, currencyPairId INTEGER NOT NULL, commandPortNumber INTEGER, feederPortNumber INTEGER, isKeptAlive BOOLEAN default 0, lastKeptAlive datetime, keepAliveStatus INTEGER default 0,  dtCreated datetime default current_timestamp, dtUpdated datetime NULL)";
 
         public const string Session_InsertNewRow =
-            "INSERT INTO Sessions(accountId, sessionId, currencyPairId, commandPortNumber) VALUES($accountId, $sessionId, $currencyPairId, $commandPortNumber)";
+            "INSERT INTO Sessions(accountId, sessionId, currencyPairId, commandPortNumber, feederPortNumber) VALUES($accountId, $sessionId, $currencyPairId, $commandPortNumber, $feederPortNumber)";
 
         public const string Sessions_QueryCommandPortNumberIfAvailable =
             "SELECT commandPortNumber FROM Sessions " +
                 "WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId " +
-                    "AND (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) > 10";
+                    "AND (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) > 10";        
 
-        public const string Sessions_QueryAvailablePortNumbersWithException =
+        public const string Sessions_QueryAvailableCommandPortNumbersWithException =
             "SELECT portNumber FROM ReservedPorts " +
-                "WHERE portNumber NOT IN " +
+                "WHERE portType = 1 AND portNumber NOT IN " +
                         "(SELECT commandPortNumber FROM Sessions " +
                             "WHERE (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) < 10 " +
                     "AND portNumber <> $exceptThisPortNumber)";
-                    
+
+        public const string Sessions_QueryFeederPortNumberIfAvailable =
+            "SELECT feederPortNumber FROM Sessions " +
+                "WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId " +
+                    "AND (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) > 10";
+
+        public const string Sessions_QueryAvailableFeederPortNumbersWithException =
+            "SELECT portNumber FROM ReservedPorts " +
+                "WHERE portType = 2 AND portNumber NOT IN " +
+                        "(SELECT feederPortNumber FROM Sessions " +
+                            "WHERE (strftime('%s', 'now') - strftime('%s', lastKeptAlive)) < 10 " +
+                    "AND portNumber <> $exceptThisPortNumber)";
 
         public const string CurrenyPairs_CreateTableIfNotExisting = 
             "CREATE TABLE IF NOT EXISTS CurrencyPairs(currencyPairId INTEGER, currencyPairName TEXT)";

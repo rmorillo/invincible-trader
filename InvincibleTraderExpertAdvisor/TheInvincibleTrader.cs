@@ -29,7 +29,7 @@ namespace InvincibleTraderExpertAdvisor
 
             StartBeacon();            
 
-            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPortNumber);
+            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPortNumber, _beacon.FeederPortNumber);
         }
 
         public void WrapUp()
@@ -73,12 +73,12 @@ namespace InvincibleTraderExpertAdvisor
                 _beacon.Start(commandPortNumber, 8200);
                 if (!_beacon.Started)
                 {
-                    (hasAvailablePortNumbers, availablePortNumbers) = _centralRegistry.GetAvailablePortNumbers(commandPortNumber);
+                    (hasAvailablePortNumbers, availablePortNumbers) = _centralRegistry.GetAvailableCommandPortNumbers(commandPortNumber);
                 }
             }
             else
             {
-                (hasAvailablePortNumbers, availablePortNumbers) = _centralRegistry.GetAvailablePortNumbers();
+                (hasAvailablePortNumbers, availablePortNumbers) = _centralRegistry.GetAvailableCommandPortNumbers();
             }
 
             if (!_beacon.Started && !hasAvailablePortNumbers)

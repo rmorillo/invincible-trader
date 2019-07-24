@@ -66,7 +66,7 @@ namespace InvincibleTraderExpertAdvisor
             return (success, message, currencyPairId);
         }
 
-        public (bool success, string message) RegisterSession(string accountId, int sessionId, int currencyPair, int portNumber)
+        public (bool success, string message) RegisterSession(string accountId, int sessionId, int currencyPair, int commandPortNumber, int feederPortNumber)
         {
             _connection.Open();
 
@@ -93,20 +93,20 @@ namespace InvincibleTraderExpertAdvisor
                 if (count == 0)
                 {
                     command.CommandText = SQLiteRegistryCommands.Session_InsertNewRow;
-                    command.Parameters.AddWithValue("$commandPortNumber", portNumber);
-                    command.Parameters.AddWithValue("$accountId", accountId);
-                    command.Parameters.AddWithValue("$sessionId", sessionId);
-                    command.Parameters.AddWithValue("$currencyPairId", currencyPair);
+                    
                 }
                 else
                 {
-                    command.CommandText = "UPDATE Sessions SET commandPortNumber=$commandPortNumber, keepAliveStatus = 0, dtUpdated = $dtUpdated WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId";
-                    command.Parameters.AddWithValue("$commandPortNumber", portNumber);
-                    command.Parameters.AddWithValue("$dtUpdated", DateTime.Now);
-                    command.Parameters.AddWithValue("$sessionId", sessionId);
-                    command.Parameters.AddWithValue("$currencyPairId", currencyPair);
-
+                    command.CommandText = "UPDATE Sessions SET commandPortNumber=$commandPortNumber, feederPortNumber=$feederPortNumber, keepAliveStatus = 0, dtUpdated = $dtUpdated WHERE currencyPairId=$currencyPairId AND sessionId=$sessionId AND accountId=$accountId";
+                    command.Parameters.AddWithValue("$dtUpdated", DateTime.Now);                    
                 }
+
+                command.Parameters.AddWithValue("$commandPortNumber", commandPortNumber);
+                command.Parameters.AddWithValue("$feederPortNumber", feederPortNumber);
+                command.Parameters.AddWithValue("$accountId", accountId);
+                command.Parameters.AddWithValue("$sessionId", sessionId);
+                command.Parameters.AddWithValue("$currencyPairId", currencyPair);
+
                 command.ExecuteNonQuery();
             }
             
@@ -129,7 +129,7 @@ namespace InvincibleTraderExpertAdvisor
 
                 using (var reader = query.ExecuteReader())
                 {
-                    if (reader.Read())
+                    if (reader.Read() && !reader.IsDBNull(0))
                     {
                         portNumber = reader.GetInt32(0);
                     }
@@ -141,7 +141,7 @@ namespace InvincibleTraderExpertAdvisor
             return (portNumber > 0, portNumber);
         }
 
-        public (bool success, int[] portNumber) GetAvailablePortNumbers(int exceptThisPortNumber = -1)
+        public (bool success, int[] portNumber) GetAvailableCommandPortNumbers(int exceptThisPortNumber = -1)
         {
             _connection.Open();
 
@@ -149,7 +149,7 @@ namespace InvincibleTraderExpertAdvisor
 
             using (var query = _connection.CreateCommand())
             {
-                query.CommandText = SQLiteRegistryCommands.Sessions_QueryAvailablePortNumbersWithException;
+                query.CommandText = SQLiteRegistryCommands.Sessions_QueryAvailableCommandPortNumbersWithException;
                 query.Parameters.AddWithValue("$exceptThisPortNumber", exceptThisPortNumber);                
 
                 using (var reader = query.ExecuteReader())
@@ -174,7 +174,58 @@ namespace InvincibleTraderExpertAdvisor
             var result = command.ExecuteNonQuery();            
             _connection.Close();            
             return result;
-        }    
-               
+        }
+
+        public (bool success, int portNumber) ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair)
+        {
+            _connection.Open();
+
+            var portNumber = 0;
+
+            using (var query = _connection.CreateCommand())
+            {
+                query.CommandText = SQLiteRegistryCommands.Sessions_QueryFeederPortNumberIfAvailable;
+                query.Parameters.AddWithValue("$currencyPairId", currencyPair);
+                query.Parameters.AddWithValue("$sessionId", sessionId);
+                query.Parameters.AddWithValue("$accountId", accountId);
+
+                using (var reader = query.ExecuteReader())
+                {
+                    if (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        portNumber = reader.GetInt32(0);
+                    }
+                }
+            }
+
+            _connection.Close();
+
+            return (portNumber > 0, portNumber);
+        }
+
+        public (bool success, int[] portNumber) GetAvailableFeederPortNumbers(int exceptThisPortNumber = -1)
+        {
+            _connection.Open();
+
+            var portNumbers = new List<int>();
+
+            using (var query = _connection.CreateCommand())
+            {
+                query.CommandText = SQLiteRegistryCommands.Sessions_QueryAvailableFeederPortNumbersWithException;
+                query.Parameters.AddWithValue("$exceptThisPortNumber", exceptThisPortNumber);
+
+                using (var reader = query.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        portNumbers.Add(reader.GetInt32(0));
+                    }
+                }
+            }
+
+            _connection.Close();
+
+            return (portNumbers.Count > 0, portNumbers.ToArray());
+        }
     }
 }

@@ -56,7 +56,7 @@ namespace InvincibleTraderExpertAdvisor.DbTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
             var sqliteReg = new SQLiteRegistry(path, fileName);
-            var nonExistingCurrencyPairName = "PHPUSD";
+            var nonExistingCurrencyPairName = "USDPHP";
 
             //Act
             (bool success, string message, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(nonExistingCurrencyPairName);
@@ -77,11 +77,13 @@ namespace InvincibleTraderExpertAdvisor.DbTests
             var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
-            (_, int[] portNumbers) = sqliteReg.GetAvailablePortNumbers();
-            int randomPortNumber = portNumbers[new Random().Next(0, portNumbers.Length - 1)];
+            (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
+            int randomCommandPortNumber = commandPortNumbers[new Random().Next(0, commandPortNumbers.Length - 1)];
+            (_, int[] feederPortNumbers) = sqliteReg.GetAvailableFeederPortNumbers();
+            int randomFeederPortNumber = feederPortNumbers[new Random().Next(0, feederPortNumbers.Length - 1)];
             string accountId = Guid.NewGuid().ToString();
             int sessionId = 1;
-            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomPortNumber);
+            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
 
             //Act
             (bool success, int portNumberResult) = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
@@ -92,7 +94,6 @@ namespace InvincibleTraderExpertAdvisor.DbTests
             TearDownTempDb(dbFile);
         }
 
-
         [Fact]
         public void ReuseCommandPortNumberOfExpiredSession_Succeeds()
         {
@@ -102,11 +103,13 @@ namespace InvincibleTraderExpertAdvisor.DbTests
             var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
-            (_, int[] portNumbers) =  sqliteReg.GetAvailablePortNumbers();
-            int randomPortNumber = portNumbers[new Random().Next(0, portNumbers.Length -1)];
+            (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
+            int randomCommandPortNumber = commandPortNumbers[new Random().Next(0, commandPortNumbers.Length - 1)];
+            (_, int[] feederPortNumbers) = sqliteReg.GetAvailableFeederPortNumbers();
+            int randomFeederPortNumber = feederPortNumbers[new Random().Next(0, feederPortNumbers.Length - 1)];
             string accountId = Guid.NewGuid().ToString();
             int sessionId = 1;
-            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomPortNumber);
+            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
 
             MarkSessionAsExpired(dbFile, accountId, sessionId, currencyPairId);
 
@@ -119,6 +122,59 @@ namespace InvincibleTraderExpertAdvisor.DbTests
             TearDownTempDb(dbFile);
         }
 
+        [Fact]
+        public void ReuseFeederPortNumberOfDeadSession_Succeds()
+        {
+            //Arrange
+            var (dbFile, path, fileName) = SetupTempDb();
+
+            var sqliteReg = new SQLiteRegistry(path, fileName);
+            var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
+            (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
+            (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
+            int randomCommandPortNumber = commandPortNumbers[new Random().Next(0, commandPortNumbers.Length - 1)];
+            (_, int[] feederPortNumbers) = sqliteReg.GetAvailableFeederPortNumbers();
+            int randomFeederPortNumber = feederPortNumbers[new Random().Next(0, feederPortNumbers.Length - 1)];
+            string accountId = Guid.NewGuid().ToString();
+            int sessionId = 1;
+            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
+
+            //Act
+            (bool success, int portNumberResult) = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
+
+            //Assert
+            Assert.False(success);
+
+            TearDownTempDb(dbFile);
+        }
+
+        [Fact]
+        public void ReuseFeederPortNumberOfExpiredSession_Succeeds()
+        {
+            //Arrange
+            var (dbFile, path, fileName) = SetupTempDb();
+
+            var sqliteReg = new SQLiteRegistry(path, fileName);
+            var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
+            (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
+            (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
+            int randomCommandPortNumber = commandPortNumbers[new Random().Next(0, commandPortNumbers.Length - 1)];
+            (_, int[] feederPortNumbers) = sqliteReg.GetAvailableFeederPortNumbers();
+            int randomFeederPortNumber = feederPortNumbers[new Random().Next(0, feederPortNumbers.Length - 1)];
+            string accountId = Guid.NewGuid().ToString();
+            int sessionId = 1;
+            sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
+
+            MarkSessionAsExpired(dbFile, accountId, sessionId, currencyPairId);
+
+            //Act
+            (bool success, int portNumberResult) = sqliteReg.ReuseFeederPortNumber(accountId, sessionId, currencyPairId);
+
+            //Assert
+            Assert.True(success);
+
+            TearDownTempDb(dbFile);
+        }
 
         private (string dbFile, string path, string fileName) SetupTempDb()
         {
