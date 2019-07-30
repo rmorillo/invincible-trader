@@ -20,7 +20,7 @@ namespace InvincibleTraderExpertAdvisor
             _beacon = beacon;
         }
 
-        public void Initialize(string accountId, int sessionId, string currencyPairName)
+        public void Initialize(string accountId, int sessionId, string currencyPairName, Delegates.BackfillEventHandler backfiller, int backfillPeriod)
         {
             _accountId = accountId;
             _sessionId = sessionId;

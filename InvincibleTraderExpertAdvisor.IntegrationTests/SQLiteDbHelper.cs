@@ -42,7 +42,28 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             finally
             {
                 connection.Close();
-            }            
-        }        
+            }
+        }
+
+        public static void NonQueryCommand(string dbFile, string sqlCommand)
+        {
+            var builder = new SQLiteConnectionStringBuilder() { DataSource = dbFile };
+            var connection = new SQLiteConnection(builder.ConnectionString);
+
+            connection.Open();
+
+            try
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = sqlCommand;
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
     }
 }

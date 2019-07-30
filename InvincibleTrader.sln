@@ -7,11 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.UnitTests", "InvincibleTraderExpertAdvisor.UnitTests\InvincibleTraderExpertAdvisor.UnitTests.csproj", "{529A4A49-66E1-451E-A3A7-7444366ECBBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.DbTests", "InvincibleTraderExpertAdvisor.DbTests\InvincibleTraderExpertAdvisor.DbTests.csproj", "{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderHeartbeatPinger", "InvincibleTraderHeartbeatPinger\InvincibleTraderHeartbeatPinger.csproj", "{E0304892-1601-4992-AE0B-24326BDF3418}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvincibleTraderExpertAdvisor.IntegrationTests", "InvincibleTraderExpertAdvisor.IntegrationTests\InvincibleTraderExpertAdvisor.IntegrationTests.csproj", "{554A9567-96C8-4792-B52D-E537C11ACB6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.IntegrationTests", "InvincibleTraderExpertAdvisor.IntegrationTests\InvincibleTraderExpertAdvisor.IntegrationTests.csproj", "{554A9567-96C8-4792-B52D-E537C11ACB6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +25,6 @@ Global
 		{529A4A49-66E1-451E-A3A7-7444366ECBBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{529A4A49-66E1-451E-A3A7-7444366ECBBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{529A4A49-66E1-451E-A3A7-7444366ECBBF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{41159C05-70C1-4913-8BBF-5A80BAD0C7BE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E0304892-1601-4992-AE0B-24326BDF3418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E0304892-1601-4992-AE0B-24326BDF3418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0304892-1601-4992-AE0B-24326BDF3418}.Release|Any CPU.ActiveCfg = Release|Any CPU

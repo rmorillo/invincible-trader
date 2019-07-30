@@ -9,15 +9,15 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         [Fact]
         public void BasicTest()
         {
-            var ea = new InvincibleTrader(new SQLiteRegistry(@"D:\InvincibleTrader\registry"), new Beacon());
+            var ea = new InvincibleTrader(new SQLiteRegistry(@"D:\InvincibleTrader\registry", new UtcClock()), new Beacon());
 
             ea.LogEvent += (logLevel, message) => { Console.WriteLine($"Log Level: {logLevel}, Message: {message}"); };
 
-            ea.Initialize("0d26339b-204c-4a93-a751-47f00b949509", 1, "EURUSD");
+            ea.Initialize("0d26339b-204c-4a93-a751-47f00b949509", 1, "EURUSD", null, 0);
 
             ea.WrapUp();
 
-            Thread.Sleep(60000);
+            Thread.Sleep(1000);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.IO;
 using System.Text;
 
 namespace InvincibleTraderExpertAdvisor
@@ -8,13 +9,15 @@ namespace InvincibleTraderExpertAdvisor
     public class SQLiteRegistry: ICentralRegistry
     {
         private SQLiteConnection _connection;
+        private IUtcClock _utcClock;
 
-        public SQLiteRegistry(string dbPath, string dbName = "titea_registry.db")
+        public SQLiteRegistry(string dbPath, IUtcClock utcClock, string dbName = "titea_registry.db")
         {
             var builder = new SQLiteConnectionStringBuilder() { DataSource = $@"{dbPath}\{dbName}" };
             _connection = new SQLiteConnection(builder.ConnectionString);
             
             Uri = dbPath;
+            _utcClock = utcClock;
 
             ExecuteCommand(SQLiteRegistryCommands.Session_CreateTableIfNotExisting);
             if (ExecuteCommand(SQLiteRegistryCommands.CurrenyPairs_CreateTableIfNotExisting)>=0)
@@ -226,6 +229,11 @@ namespace InvincibleTraderExpertAdvisor
             _connection.Close();
 
             return (portNumbers.Count > 0, portNumbers.ToArray());
+        }
+
+        public ITickWriter GetTickWriter(string accountId, int currencyPairId)
+        {
+            return new TickWriter(Uri, accountId, currencyPairId, _utcClock);
         }
     }
 }

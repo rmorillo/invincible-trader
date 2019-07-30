@@ -12,6 +12,7 @@ namespace InvincibleTraderExpertAdvisor
         (bool success, int[] portNumber) GetAvailableCommandPortNumbers(int exceptThisPortNumber = -1);
         (bool success, int portNumber) ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair);
         (bool success, int[] portNumber) GetAvailableFeederPortNumbers(int exceptThisPortNumber = -1);
+        ITickWriter GetTickWriter(string accountId, int currencyPairId);        
         string Uri { get; }                
     }
 }
