@@ -7,15 +7,13 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
 {
     public class TickWriterTests
     {
-        private IUtcClock _utcClock = new UtcClock();
-
         [Fact]
         public void GetTickUriOnNewDbPth_ShouldNotExist()
         {
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -40,7 +38,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -65,7 +63,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -76,9 +74,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             int sessionId = 1;
             sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
             var tickWriter = sqliteReg.GetTickWriter(accountId, currencyPairId);
+            var timestamp = Timestamp.FromDateTime(DateTime.UtcNow);
 
             //Act
-            var result = tickWriter.Write(DateTime.UtcNow.Ticks, 1, 2);
+            var result = tickWriter.Write(timestamp.dateTime, timestamp.milliseconds, 1, 2);
 
             //Assert
             Assert.True(result.success);

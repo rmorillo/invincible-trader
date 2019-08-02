@@ -9,6 +9,8 @@ namespace InvincibleTraderExpertAdvisor
         private int _currencyPairId;        
         private int _sessionId;
         private string _accountId;
+        private IUtcClock _utcClock;
+        private ITickWriter _tickWriter;
 
         public int LogLevel { get; set; } = 0;
 
@@ -20,16 +22,35 @@ namespace InvincibleTraderExpertAdvisor
             _beacon = beacon;
         }
 
-        public void Initialize(string accountId, int sessionId, string currencyPairName, Delegates.BackfillEventHandler backfiller, int backfillPeriod)
+        public void Initialize(string accountId, int sessionId, string currencyPairName, IUtcClock utcClock, Delegates.BackfillEventHandler backfiller, TimeSpan backfillPeriod)
         {
             _accountId = accountId;
             _sessionId = sessionId;
 
-            ResolveCurrencyPairId(currencyPairName);
+            ResolveCurrencyPairId(currencyPairName);            
+                        
+            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPortNumber, _beacon.FeederPortNumber);            
 
-            StartBeacon();            
+            StartBeacon();
 
-            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPortNumber, _beacon.FeederPortNumber);
+            _utcClock = utcClock;
+
+            _tickWriter = _centralRegistry.GetTickWriter(_accountId, _currencyPairId);
+            var lastTick = _tickWriter.LastTick;
+
+            var endTime = _utcClock.Now;
+            var startTime = endTime;
+
+            if (lastTick.success)
+            {
+                startTime = Timestamp.ToDateTime(lastTick.tsDateTime, lastTick.tsMilliseconds);                
+            }
+            else
+            {
+                startTime = endTime.Subtract(backfillPeriod);
+            }
+            //TODO:  Backfiller should run in the background
+            var backfill = backfiller(startTime, endTime);
         }
 
         public void WrapUp()

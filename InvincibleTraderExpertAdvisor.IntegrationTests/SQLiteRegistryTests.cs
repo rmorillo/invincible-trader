@@ -6,9 +6,7 @@ using Xunit;
 namespace InvincibleTraderExpertAdvisor.IntegrationTests
 {
     public class SQLiteRegistryTests
-    {
-        private IUtcClock _utcClock = new UtcClock();
-
+    {        
         [Fact]
         public void SQLiteRegistryInstantiation_InitializesDbSuccessfully()
         {
@@ -16,7 +14,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             var (dbFile, path, fileName) = SetupTempDb();
 
             //Act
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
 
             //Assert
             var result = SQLiteDbHelper.Query(dbFile, "SELECT name FROM sqlite_master WHERE type = 'table'");
@@ -37,7 +35,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
 
             //Act
@@ -55,7 +53,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         {
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var nonExistingCurrencyPairName = "USDPHP";
 
             //Act
@@ -74,7 +72,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -100,7 +98,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -128,7 +126,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();
@@ -154,7 +152,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             //Arrange
             var (dbFile, path, fileName) = SetupTempDb();
 
-            var sqliteReg = new SQLiteRegistry(path, _utcClock, fileName);
+            var sqliteReg = new SQLiteRegistry(path, fileName);
             var randomCurrencyPairName = GetRandomCurrencyPairName(dbFile);
             (_, _, int currencyPairId) = sqliteReg.GetCurrencyPairIdByName(randomCurrencyPairName);
             (_, int[] commandPortNumbers) = sqliteReg.GetAvailableCommandPortNumbers();

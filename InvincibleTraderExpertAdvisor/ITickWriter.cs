@@ -6,8 +6,8 @@ namespace InvincibleTraderExpertAdvisor
 {
     public interface ITickWriter
     {
-        (bool success, long timestamp, double bid, double ask) LastTick { get; }
+        (bool success, long tsDateTime, int tsMilliseconds, double bid, double ask) LastTick { get; }
         string TickUri { get; }
-        (bool success, string message) Write(long timestamp, double bid, double ask);
+        (bool success, string message) Write(long tsDateTime, int tsMilliseconds, double bid, double ask);
     }
 }

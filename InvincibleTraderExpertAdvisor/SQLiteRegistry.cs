@@ -8,16 +8,14 @@ namespace InvincibleTraderExpertAdvisor
 {
     public class SQLiteRegistry: ICentralRegistry
     {
-        private SQLiteConnection _connection;
-        private IUtcClock _utcClock;
+        private SQLiteConnection _connection;        
 
-        public SQLiteRegistry(string dbPath, IUtcClock utcClock, string dbName = "titea_registry.db")
+        public SQLiteRegistry(string dbPath, string dbName = "titea_registry.db")
         {
             var builder = new SQLiteConnectionStringBuilder() { DataSource = $@"{dbPath}\{dbName}" };
             _connection = new SQLiteConnection(builder.ConnectionString);
             
-            Uri = dbPath;
-            _utcClock = utcClock;
+            Uri = dbPath;            
 
             ExecuteCommand(SQLiteRegistryCommands.Session_CreateTableIfNotExisting);
             if (ExecuteCommand(SQLiteRegistryCommands.CurrenyPairs_CreateTableIfNotExisting)>=0)
@@ -233,7 +231,7 @@ namespace InvincibleTraderExpertAdvisor
 
         public ITickWriter GetTickWriter(string accountId, int currencyPairId)
         {
-            return new TickWriter(Uri, accountId, currencyPairId, _utcClock);
+            return new TickWriter(Uri, accountId, currencyPairId);
         }
     }
 }

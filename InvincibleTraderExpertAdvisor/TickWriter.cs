@@ -13,18 +13,15 @@ namespace InvincibleTraderExpertAdvisor
         private int _currencyPairId;
         private string _registryPath;
         private SQLiteConnection _connection;
-        private IUtcClock _utcClock;
 
-        public TickWriter(string registryPath, string accountId, int currencyPairId, IUtcClock utcClock)
+        public TickWriter(string registryPath, string accountId, int currencyPairId)
         {
             _registryPath = registryPath;
             _accountId = accountId;
-            _currencyPairId = currencyPairId;
-
-            _utcClock = utcClock;
+            _currencyPairId = currencyPairId;            
         }
 
-        public (bool success, long timestamp, double bid, double ask) LastTick
+        public (bool success, long tsDateTime, int tsMilliseconds, double bid, double ask) LastTick
         {
             get
             {
@@ -33,7 +30,8 @@ namespace InvincibleTraderExpertAdvisor
                 Directory.CreateDirectory(tickFolder);
 
                 bool success = false;
-                long lastTimestamp = long.MinValue;
+                long tsDateTime = long.MinValue;
+                int tsMilliseconds = int.MinValue;
                 double lastBid = double.NaN;
                 double lastAsk = double.NaN;
 
@@ -47,15 +45,16 @@ namespace InvincibleTraderExpertAdvisor
                     var connection = new SQLiteConnection(builder.ConnectionString);
                     connection.Open();
                     var query = connection.CreateCommand();
-                    query.CommandText = "SELECT timestamp, bid, ask FROM Ticks ORDER BY timestamp DESC LIMIT 1";
+                    query.CommandText = "SELECT tsDateTime, tsMilliseconds, bid, ask FROM Ticks ORDER BY timestamp DESC LIMIT 1";
 
                     using (var reader = query.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            lastTimestamp = reader.GetInt64(reader.GetOrdinal("timestamp"));
+                            tsDateTime = reader.GetInt64(reader.GetOrdinal("tsDateTime"));
+                            tsMilliseconds = reader.GetInt32(reader.GetOrdinal("tsMilliseconds"));
                             lastBid = reader.GetDouble(reader.GetOrdinal("bid"));
-                            lastAsk = reader.GetDouble(reader.GetOrdinal("bid"));
+                            lastAsk = reader.GetDouble(reader.GetOrdinal("ask"));
                         }
                     }
 
@@ -64,7 +63,7 @@ namespace InvincibleTraderExpertAdvisor
                     success = true;
                 }
 
-                return (success, lastTimestamp, lastBid, lastAsk);
+                return (success, tsDateTime, tsMilliseconds, lastBid, lastAsk);
             }
         }
 
@@ -76,15 +75,14 @@ namespace InvincibleTraderExpertAdvisor
             }
         }
 
-        public (bool success, string message) Write(long timestamp, double bid, double ask)
+        public (bool success, string message) Write(long tsDateTime, int tsMilliseconds, double bid, double ask)
         {
             bool success = false;
             string message = null;
 
-            var utcTimestamp = _utcClock.FromTicks(timestamp);
-            var utcNow = _utcClock.Now;
+            var utcTimestamp = Timestamp.ToDateTime(tsDateTime, tsMilliseconds);            
            
-            if (_connection == null || utcTimestamp.Year != utcNow.Year || utcTimestamp.Month != utcNow.Month || utcTimestamp.Day != utcNow.Day)
+            if (_connection == null)
             {                
                 string tickDbFile = $@"{TickUri}\{_currencyPairId}_{utcTimestamp.Year}{utcTimestamp.Month}{utcTimestamp.Day}.tick";
 
@@ -99,8 +97,8 @@ namespace InvincibleTraderExpertAdvisor
 
                 command.CommandText = TickWriterCommands.Quotes_InsertNewRow;
 
-                command.Parameters.AddWithValue("$timestamp", timestamp);
-
+                command.Parameters.AddWithValue("$tsDateTime", tsDateTime);
+                command.Parameters.AddWithValue("$tsMilliseconds", tsMilliseconds);
                 command.Parameters.AddWithValue("bid", bid);
                 command.Parameters.AddWithValue("ask", ask);
 

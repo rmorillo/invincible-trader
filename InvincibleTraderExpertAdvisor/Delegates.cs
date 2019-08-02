@@ -8,6 +8,6 @@ namespace InvincibleTraderExpertAdvisor
     {
         public delegate void LogEventHandler(int logLevel, string message);
 
-        public delegate (long timestamp, double bid, double ask)[] BackfillEventHandler(long startTimestamp, long endTimestamp);
+        public delegate (long tsDateTime, int tsMilliseconds, double bid, double ask)[] BackfillEventHandler(DateTime startTimestamp, DateTime endTimestamp);
     }
 }
