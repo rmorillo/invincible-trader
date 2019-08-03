@@ -14,7 +14,7 @@ namespace InvincibleTraderExpertAdvisor
 
         public event Delegates.LogEventHandler LogEvent;
 
-        public BackgroundWorker _worker= new BackgroundWorker();
+        private BackgroundWorker _worker= new BackgroundWorker();
 
         private PublisherSocket _feederSocket;
 
@@ -87,8 +87,7 @@ namespace InvincibleTraderExpertAdvisor
             {
                 client.Connect($"tcp://localhost:{CommandPortNumber}");                
                 client.SendFrame("Hello");
-                string reply;
-                if (client.TryReceiveFrameString(new TimeSpan(0, 0, 3), out reply))
+                if (client.TryReceiveFrameString(new TimeSpan(0, 0, 3), out string reply))
                 {
                     message = $"Received {reply}";
                 }
@@ -99,7 +98,7 @@ namespace InvincibleTraderExpertAdvisor
             }           
         }
 
-        private async void Worker(object sender, DoWorkEventArgs e)
+        private void Worker(object sender, DoWorkEventArgs e)
         {
             try
             {

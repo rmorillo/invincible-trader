@@ -11,18 +11,21 @@ namespace InvincibleTraderExpertAdvisor
         private string _accountId;
         private IUtcClock _utcClock;
         private ITickWriter _tickWriter;
+        private IBackfiller _backfiller;
 
         public int LogLevel { get; set; } = 0;
 
         public event Delegates.LogEventHandler LogEvent;
 
-        public InvincibleTrader(ICentralRegistry centralRegistry, IBeacon beacon)
-        {            
+        public InvincibleTrader(IUtcClock utcClock, ICentralRegistry centralRegistry, IBeacon beacon, IBackfiller backfiller)
+        {
+            _utcClock = utcClock;
             _centralRegistry = centralRegistry;
             _beacon = beacon;
+            _backfiller = backfiller;
         }
 
-        public void Initialize(string accountId, int sessionId, string currencyPairName, IUtcClock utcClock, Delegates.BackfillEventHandler backfiller, TimeSpan backfillPeriod)
+        public void Initialize(string accountId, int sessionId, string currencyPairName)
         {
             _accountId = accountId;
             _sessionId = sessionId;
@@ -31,26 +34,30 @@ namespace InvincibleTraderExpertAdvisor
                         
             _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPortNumber, _beacon.FeederPortNumber);            
 
-            StartBeacon();
-
-            _utcClock = utcClock;
+            StartBeacon();            
 
             _tickWriter = _centralRegistry.GetTickWriter(_accountId, _currencyPairId);
-            var lastTick = _tickWriter.LastTick;
+
+            StartBackfill();
+        }
+
+        public void StartBackfill()
+        {
+            var (success, tsDateTime, tsMilliseconds, bid, ask) = _tickWriter.LastTick;
 
             var endTime = _utcClock.Now;
             var startTime = endTime;
 
-            if (lastTick.success)
+            if (success)
             {
-                startTime = Timestamp.ToDateTime(lastTick.tsDateTime, lastTick.tsMilliseconds);                
+                startTime = Timestamp.ToDateTime(tsDateTime, tsMilliseconds);
             }
             else
             {
-                startTime = endTime.Subtract(backfillPeriod);
+                startTime = endTime.Subtract(_backfiller.BackfillPeriod);
             }
-            //TODO:  Backfiller should run in the background
-            var backfill = backfiller(startTime, endTime);
+
+            _backfiller.Start(startTime, endTime);
         }
 
         public void WrapUp()
@@ -70,11 +77,11 @@ namespace InvincibleTraderExpertAdvisor
 
         private void ResolveCurrencyPairId(string currencyPairName)
         {
-            var result = _centralRegistry.GetCurrencyPairIdByName(currencyPairName);
+            var (success, message, currencyPairId) = _centralRegistry.GetCurrencyPairIdByName(currencyPairName);
 
-            if (result.success)
+            if (success)
             {
-                _currencyPairId = result.currencyPairId;
+                _currencyPairId = currencyPairId;
             }
             else
             {

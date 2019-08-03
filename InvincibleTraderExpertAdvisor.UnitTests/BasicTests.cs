@@ -9,7 +9,7 @@ namespace InvincibleTraderExpertAdvisor.UnitTests
         [Fact]
         public void BasicTest()
         {
-            var ea = new InvincibleTrader(null, null);
+            var ea = new InvincibleTrader(null, null, null, null);
 
         }
     }
