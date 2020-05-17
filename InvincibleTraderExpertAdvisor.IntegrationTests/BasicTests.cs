@@ -6,10 +6,26 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
 {
     public class BasicTests
     {
+        private readonly string CentralRegistryPath;
+
+        public BasicTests()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                CentralRegistryPath = Environment.GetEnvironmentVariable("INVINCIBLE_TRADER_TEST_REGISTRY_HOME", EnvironmentVariableTarget.Machine);
+            }
+            else
+            {
+                CentralRegistryPath = Environment.GetEnvironmentVariable("INVINCIBLE_TRADER_TEST_REGISTRY_HOME");
+            }
+
+            Console.WriteLine($"Registry: {CentralRegistryPath}");
+        }
+
         [Fact]
         public void BasicTest()
         {
-            var ea = new InvincibleTrader(new UtcClock(), new SQLiteRegistry(@"D:\InvincibleTrader\registry"), new Beacon(), new Backfiller());
+            var ea = new InvincibleTrader(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller());
 
             ea.LogEvent += (logLevel, message) => { Console.WriteLine($"Log Level: {logLevel}, Message: {message}"); };
 

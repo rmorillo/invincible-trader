@@ -84,10 +84,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
 
             //Act
-            (bool success, int portNumberResult) = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
+            var portNumberResult = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
 
             //Assert
-            Assert.False(success);
+            Assert.False(portNumberResult > 0);
 
             TearDownTempDb(dbFile);
         }
@@ -112,10 +112,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             MarkSessionAsExpired(dbFile, accountId, sessionId, currencyPairId);
 
             //Act
-            (bool success, int portNumberResult) = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
+            var portNumberResult = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
 
             //Assert
-            Assert.True(success);
+            Assert.True(portNumberResult > 0);
             
             TearDownTempDb(dbFile);
         }
@@ -138,10 +138,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             sqliteReg.RegisterSession(accountId, sessionId, currencyPairId, randomCommandPortNumber, randomFeederPortNumber);
 
             //Act
-            (bool success, int portNumberResult) = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
+            var portNumberResult = sqliteReg.ReuseCommandPortNumber(accountId, sessionId, currencyPairId);
 
             //Assert
-            Assert.False(success);
+            Assert.False(portNumberResult > 0);
 
             TearDownTempDb(dbFile);
         }
@@ -166,10 +166,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
             MarkSessionAsExpired(dbFile, accountId, sessionId, currencyPairId);
 
             //Act
-            (bool success, int portNumberResult) = sqliteReg.ReuseFeederPortNumber(accountId, sessionId, currencyPairId);
+            var portNumberResult = sqliteReg.ReuseFeederPortNumber(accountId, sessionId, currencyPairId);
 
             //Assert
-            Assert.True(success);
+            Assert.True(portNumberResult > 0);
 
             TearDownTempDb(dbFile);
         }
@@ -178,6 +178,8 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         private (string dbFile, string path, string fileName) SetupTempDb()
         {
             var dbFile = Path.GetTempFileName();
+
+            Console.WriteLine($"Temp DB File: {dbFile}");
             
             var path = Path.GetDirectoryName(dbFile);
             var fileName = Path.GetFileName(dbFile);

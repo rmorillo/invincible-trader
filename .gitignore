@@ -4,3 +4,16 @@ obj/
 .vs/
 packages/
 *.user
+.dotnet/
+.local/
+.bash_history
+.nuget/
+*.htm
+*.html
+*.svg
+*.css
+*.js
+*.pubxml
+*.xml
+*.trx
+*.json

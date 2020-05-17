@@ -6,11 +6,9 @@ namespace InvincibleTraderExpertAdvisor
 {
     public interface IBeacon
     {
-        int CommandPortNumber { get; }
-        int FeederPortNumber { get; }
-        event Delegates.LogEventHandler LogEvent;
-        void Start(int commandServerPort, int feederPort);
+        IBeaconPort Commander { get; }
+        IBeaconPort Feeder { get; }
+        void Start(int commandServerPort, int feederPort, IBeaconPortAvailability portAvailability);
         void Stop();
-        bool Started { get; }
     }
 }

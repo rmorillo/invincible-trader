@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
-using System.Text;
 
 namespace InvincibleTraderExpertAdvisor
 {
@@ -115,7 +113,7 @@ namespace InvincibleTraderExpertAdvisor
             return (true, null);
         }
 
-        public (bool success, int portNumber) ReuseCommandPortNumber(string accountId, int sessionId, int currencyPair)
+        public int ReuseCommandPortNumber(string accountId, int sessionId, int currencyPair)
         {
             _connection.Open();
 
@@ -139,7 +137,7 @@ namespace InvincibleTraderExpertAdvisor
 
             _connection.Close();
 
-            return (portNumber > 0, portNumber);
+            return portNumber;
         }
 
         public (bool success, int[] portNumber) GetAvailableCommandPortNumbers(int exceptThisPortNumber = -1)
@@ -167,8 +165,10 @@ namespace InvincibleTraderExpertAdvisor
             return (portNumbers.Count > 0, portNumbers.ToArray());
         }
 
-            private int ExecuteCommand(string commandText)
+        private int ExecuteCommand(string commandText)
         {
+            Console.WriteLine($"Opening database: {_connection.ConnectionString}");
+            Console.WriteLine($"Executing Sqlite command: {commandText}");
             _connection.Open();
             var command = _connection.CreateCommand();
             command.CommandText = commandText;
@@ -177,7 +177,7 @@ namespace InvincibleTraderExpertAdvisor
             return result;
         }
 
-        public (bool success, int portNumber) ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair)
+        public int ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair)
         {
             _connection.Open();
 
@@ -201,7 +201,7 @@ namespace InvincibleTraderExpertAdvisor
 
             _connection.Close();
 
-            return (portNumber > 0, portNumber);
+            return portNumber;
         }
 
         public (bool success, int[] portNumber) GetAvailableFeederPortNumbers(int exceptThisPortNumber = -1)

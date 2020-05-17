@@ -4,14 +4,12 @@ using System.Text;
 
 namespace InvincibleTraderExpertAdvisor
 {
-    public interface ICentralRegistry
+    public interface ICentralRegistry: IBeaconPortAvailability
     {
         (bool success, string message) RegisterSession(string accountId, int sessionId, int currencyPair, int commandPortNumber, int feederPortNumber);
         (bool success, string message, int currencyPairId) GetCurrencyPairIdByName(string currencyPairName);
-        (bool success, int portNumber) ReuseCommandPortNumber(string accountId, int sessionId, int currencyPair);
-        (bool success, int[] portNumber) GetAvailableCommandPortNumbers(int exceptThisPortNumber = -1);
-        (bool success, int portNumber) ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair);
-        (bool success, int[] portNumber) GetAvailableFeederPortNumbers(int exceptThisPortNumber = -1);
+        int ReuseCommandPortNumber(string accountId, int sessionId, int currencyPair);        
+        int ReuseFeederPortNumber(string accountId, int sessionId, int currencyPair);        
         ITickWriter GetTickWriter(string accountId, int currencyPairId);        
         string Uri { get; }                
     }

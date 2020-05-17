@@ -9,5 +9,7 @@ namespace InvincibleTraderExpertAdvisor
         public delegate void LogEventHandler(int logLevel, string message);
 
         public delegate (long tsDateTime, int tsMilliseconds, double bid, double ask)[] BackfillEventHandler(DateTime startTimestamp, DateTime endTimestamp);
+
+        public delegate (bool success, int[] portNumber) GetAvailablePortNumbersHandler(int exceptThisPortNumber = -1);
     }
 }
