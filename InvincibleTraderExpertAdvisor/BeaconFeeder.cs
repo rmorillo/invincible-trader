@@ -1,54 +1,114 @@
-﻿using NetMQ.Sockets;
+﻿using NetMQ;
+using NetMQ.Sockets;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
+using System.Threading;
 
 namespace InvincibleTraderExpertAdvisor
 {
     public class BeaconFeeder : IBeaconPort
     {
-        private PublisherSocket _feederSocket;
-        public int PortNumber => throw new NotImplementedException();
+        private AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
 
-        public bool Started => throw new NotImplementedException();
+        private BackgroundWorker _worker = new BackgroundWorker();
+
+        private PublisherSocket _feederSocket;
+        public int PortNumber { get; private set; }
+
+        public bool Started { get; private set; }
 
         public event Delegates.LogEventHandler LogEvent;
 
+        public ConcurrentQueue<(long tsDateTime, int tsMilliseconds, double bid, double ask)> _quotes;
+
+        public BeaconFeeder()
+        {
+             _quotes = new ConcurrentQueue<(long tsDateTime, int tsMilliseconds, double bid, double ask)>();
+
+            _worker.DoWork += Worker;
+            _worker.WorkerSupportsCancellation = true; ;
+        }
+
         public void Start(int feederPort)
-        {           
-            Random rand = new Random(50);
-            _feederSocket = new PublisherSocket();
-
-            _feederSocket.Options.SendHighWatermark = 1000;
-            _feederSocket.Bind($"tcp://*:{feederPort}");
-            /*
-            for (var i = 0; i < 100; i++)
+        {
+            if (!Started)
             {
-                var randomizedTopic = rand.NextDouble();
-                if (randomizedTopic > 0.5)
-                {
-                    var msg = "TopicA msg-" + i;
-                    Console.WriteLine("Sending message : {0}", msg);
-                    _feederSocket.SendMoreFrame("TopicA").SendFrame(msg);
-                }
-                else
-                {
-                    var msg = "TopicB msg-" + i;
-                    Console.WriteLine("Sending message : {0}", msg);
-                    _feederSocket.SendMoreFrame("TopicB").SendFrame(msg);
-                }
-                Thread.Sleep(500);
+                Started = false;
+                PortNumber = feederPort;
 
+                if (_worker.IsBusy)
+                {
+                    while (_worker.IsBusy)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+
+                _worker.RunWorkerAsync(feederPort);
+                _autoResetEvent.WaitOne();
             }
-            */
+        }
+
+        private void Worker(object sender, DoWorkEventArgs e)
+        {
+            using (_feederSocket = new PublisherSocket())
+            {
+                try
+                {
+                    _feederSocket.Options.SendHighWatermark = 1000;
+                    _feederSocket.Bind($"tcp://*:{e.Argument}");
+                    Started = true;
+                }
+                catch (Exception ex)
+                {
+                    LogEvent?.Invoke(3, ex.Message);
+                }
+                finally
+                {
+                    _autoResetEvent.Set();
+                }
+
+                if (Started)
+                {
+                    while (true)
+                    {
+                        if (_worker.CancellationPending)
+                        {
+                            e.Cancel = true;
+                            break;
+                        }
+
+                        while (_quotes.TryDequeue(out (long tsDateTime, int tsMilliseconds, double bid, double ask) result))
+                        {
+                            _feederSocket.SendMoreFrame("Ticks").SendFrame($"ts:{result.tsDateTime.ToString()}{result.tsMilliseconds.ToString()},bid:{result.bid},ask:{result.ask}");
+                        }
+
+                        _autoResetEvent.WaitOne();
+                    }
+                }
+            }
+        }
+
+        public void SendTick(long tsDateTime, int tsMilliseconds, double bid, double ask)
+        {
+            _quotes.Enqueue((tsDateTime, tsMilliseconds, bid, ask));
+            _autoResetEvent.Set();
         }
 
         public void Stop()
         {
-            if (!_feederSocket.IsDisposed)
+            if (_worker.IsBusy)
             {
-                _feederSocket.Close();
-                _feederSocket.Dispose();
+                _worker.CancelAsync();
+                _autoResetEvent.Set();
+
+                while (_worker.IsBusy)
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
     }

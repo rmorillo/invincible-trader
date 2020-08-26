@@ -1,37 +1,63 @@
-﻿using NetMQ;
+﻿using InvincibleTrader.Common;
+using NetMQ;
 using NetMQ.Sockets;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace InvincibleTraderExpertAdvisor
 {
     public class BeaconCommander : IBeaconPort
     {
+        private AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
+
         private BackgroundWorker _worker = new BackgroundWorker();
 
         public int PortNumber { get; private set; }
 
-        public bool Started => throw new NotImplementedException();
+        public bool Started { get; private set; } = false;      
 
-        public event Delegates.LogEventHandler LogEvent;
+        public event Delegates.LogEventHandler LogEvent;        
+
+        public BeaconCommander()
+        {
+            _worker.DoWork += Worker;
+            _worker.WorkerSupportsCancellation = true; ;
+        }
 
         public void Start(int commandServerPort)
         {
-            PortNumber = commandServerPort;
-            _worker.DoWork += Worker;
-            _worker.WorkerSupportsCancellation = true; ;
-            _worker.RunWorkerAsync(commandServerPort);
+            if (!Started)
+            {
+                Started = false;
+                PortNumber = commandServerPort;
+
+                if (_worker.IsBusy)
+                {
+                    while (_worker.IsBusy)
+                    {
+                        Thread.Sleep(100);
+                    }                    
+                }
+
+                _worker.RunWorkerAsync(commandServerPort);
+                _autoResetEvent.WaitOne();
+            }
         }
 
         public void Stop()
         {
-            if (_worker.IsBusy && !_worker.CancellationPending)
+            if (_worker.IsBusy)
             {
                 _worker.CancelAsync();
-                Ping();
+
+                while (_worker.IsBusy)
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
 
@@ -55,11 +81,25 @@ namespace InvincibleTraderExpertAdvisor
 
         private void Worker(object sender, DoWorkEventArgs e)
         {
-            try
+            using (var server = new ResponseSocket())
             {
-                using (var server = new ResponseSocket())
+                try
                 {
                     server.Bind($"tcp://*:{e.Argument}");
+                    Started = true;
+                }
+                catch (Exception ex)
+                {
+                    LogEvent?.Invoke(3, ex.Message);                    
+                }
+                finally
+                {
+                    _autoResetEvent.Set();
+                }
+
+                if (Started)
+                {
+                    var pingCommand = new PingCommand();
 
                     while (true)
                     {
@@ -67,22 +107,36 @@ namespace InvincibleTraderExpertAdvisor
                         {
                             e.Cancel = true;
                             break;
-                        }
+                        }                        
 
-                        var message = server.ReceiveFrameString();
-                        LogEvent?.Invoke(2, $"Received {message}");
-                        //await Task.Delay(100);
-                        LogEvent?.Invoke(2, "Sending World");
-                        server.SendFrame("World");
-                        //await Task.Delay(100);
+                        if (server.TryReceiveFrameBytes(TimeSpan.FromSeconds(1), out byte[] payload))
+                        {
+                            var command = GetCommand(payload);
+
+                            switch(command)
+                            {
+                                case BeaconCommandOption.Ping:
+                                    var (success, data) = pingCommand.DecodeCall(payload);
+                                    if (success)
+                                    {
+                                        server.SendFrame(pingCommand.EncodeReturn(data));
+                                    }
+                                    break;
+                            }
+                            //LogEvent?.Invoke(2, $"Received {payload}");
+                            //await Task.Delay(100);
+                            //LogEvent?.Invoke(2, "Sending World");
+                            //server.SendFrame("World");
+                            //await Task.Delay(100);
+                        }
                     }
                 }
+            }                        
+        }
 
-            }
-            catch (Exception ex)
-            {
-                LogEvent?.Invoke(3, ex.Message);
-            }
+        private BeaconCommandOption GetCommand(byte[] payload)
+        {
+            return (BeaconCommandOption)BitConverter.ToInt32(payload, 0);
         }
 
         private static async Task WaitUntil(Func<bool> condition, int frequency = 25, int timeout = -1)

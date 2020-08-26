@@ -11,6 +11,7 @@ namespace InvincibleTraderExpertAdvisor
     {
         private string _accountId;
         private int _currencyPairId;
+        private long _currentTimestampDate = 0;
         private string _registryPath;
         private SQLiteConnection _connection;
 
@@ -25,7 +26,7 @@ namespace InvincibleTraderExpertAdvisor
         {
             get
             {
-                var tickFolder = TickUri;
+                var tickFolder = TickDbFolder;
 
                 Directory.CreateDirectory(tickFolder);
 
@@ -45,7 +46,7 @@ namespace InvincibleTraderExpertAdvisor
                     var connection = new SQLiteConnection(builder.ConnectionString);
                     connection.Open();
                     var query = connection.CreateCommand();
-                    query.CommandText = "SELECT tsDateTime, tsMilliseconds, bid, ask FROM Ticks ORDER BY timestamp DESC LIMIT 1";
+                    query.CommandText = "SELECT tsDateTime, tsMilliseconds, bid, ask FROM Quotes ORDER BY tsDateTime DESC, tsMilliseconds DESC LIMIT 1";
 
                     using (var reader = query.ExecuteReader())
                     {
@@ -67,7 +68,7 @@ namespace InvincibleTraderExpertAdvisor
             }
         }
 
-        public string TickUri 
+        public string TickDbFolder 
         {
             get
             {
@@ -75,18 +76,33 @@ namespace InvincibleTraderExpertAdvisor
             }
         }
 
+        public string TickDbFilename { get; private set; }
+        
+
         public (bool success, string message) Write(long tsDateTime, int tsMilliseconds, double bid, double ask)
         {
             bool success = false;
             string message = null;
 
-            var utcTimestamp = Timestamp.ToDateTime(tsDateTime, tsMilliseconds);            
-           
-            if (_connection == null)
-            {                
-                string tickDbFile = $@"{TickUri}\{_currencyPairId}_{utcTimestamp.Year}{utcTimestamp.Month}{utcTimestamp.Day}.tick";
+            var utcTimestamp = Timestamp.ToDateTime(tsDateTime, tsMilliseconds);
 
-                _connection = OpenTickDb(tickDbFile);
+            var tsDate = Timestamp.ExtractTimestampDate(tsDateTime);
+
+            if (_connection == null || tsDate != _currentTimestampDate)
+            {          
+                if (_connection != null)
+                {
+                    _connection.Close();
+                }
+
+                if (tsDate != _currentTimestampDate)
+                {
+                    _currentTimestampDate = tsDate;
+                }
+
+                TickDbFilename = $@"{_currencyPairId}_{utcTimestamp.Year}{utcTimestamp.Month}{utcTimestamp.Day}.tick";                
+
+                _connection = OpenTickDb(Path.Combine(TickDbFolder, TickDbFilename));
             }
 
             _connection.Open();

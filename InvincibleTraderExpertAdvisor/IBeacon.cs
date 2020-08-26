@@ -6,9 +6,10 @@ namespace InvincibleTraderExpertAdvisor
 {
     public interface IBeacon
     {
-        IBeaconPort Commander { get; }
-        IBeaconPort Feeder { get; }
+        int CommandPort { get; }
+        int FeederPort { get; }
         void Start(int commandServerPort, int feederPort, IBeaconPortAvailability portAvailability);
         void Stop();
+        void SendTick(long tsDateTime, int tsMilliseconds, double bid, double ask);
     }
 }

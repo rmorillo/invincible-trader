@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InvincibleTrader.Common\InvincibleTrader.Common.csproj" />
+    <ProjectReference Include="..\InvincibleTraderExpertAdvisor\InvincibleTraderExpertAdvisor.csproj" />
+  </ItemGroup>
+
+</Project>

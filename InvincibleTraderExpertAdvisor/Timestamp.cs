@@ -22,6 +22,11 @@ namespace InvincibleTraderExpertAdvisor
             return new DateTime(yearPart, yearMonthPart - (yearPart * 100), yearMonthDayPart - (yearMonthPart * 100), hourPart, hourMinPart - (hourPart * 100), hourMinSecPart - (hourMinPart * 100), timestampMilliseconds);
         }
 
+        public static long ExtractTimestampDate(long timestampDateTime)
+        {
+            return (timestampDateTime / 1000000);            
+        }
+
         private static long GetTimestampDateTime(DateTime dateTime)
         {            
             return (dateTime.Year * 10000000000) + (dateTime.Month * 100000000) + (dateTime.Day * 1000000) + (dateTime.Hour * 10000) + (dateTime.Minute * 100) + (dateTime.Second);

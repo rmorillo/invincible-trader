@@ -14,4 +14,8 @@
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.111" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\InvincibleTrader.Common\InvincibleTrader.Common.csproj" />
+  </ItemGroup>
+
 </Project>

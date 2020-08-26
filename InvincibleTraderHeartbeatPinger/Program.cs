@@ -1,4 +1,5 @@
-﻿using NetMQ;
+﻿using InvincibleTrader.Common;
+using NetMQ;
 using NetMQ.Sockets;
 using System;
 using System.Collections.Generic;
@@ -99,11 +100,15 @@ namespace InvincibleTraderHeartbeatPinger
                 client.Connect($"tcp://localhost:{sessionInfo.commandPortNumber}");
 
                 Console.WriteLine($"Pinging at port {sessionInfo.commandPortNumber}, Currency Pair Id = {sessionInfo.CurrencyPairId}, Session Id = {sessionInfo.SessionId}, Account  Id = {sessionInfo.AccountId}");
-                client.SendFrame("Hello");
-                string reply;
-                if (client.TryReceiveFrameString(new TimeSpan(0, 0, 3), out reply))
+                //client.SendFrame("Hello");
+                long payload = DateTime.Now.Ticks;
+                var pingCommand = new PingCommand();
+
+                client.SendFrame(pingCommand.EncodeCall(payload));
+                
+                if (client.TryReceiveFrameBytes(new TimeSpan(0, 0, 3), out byte[] reply))
                 {
-                    message = $"Received {reply}";
+                    message = $"Received reply";
                     success = true;
                 }
                 else

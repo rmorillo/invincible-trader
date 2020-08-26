@@ -8,25 +8,28 @@ namespace InvincibleTraderExpertAdvisor
 {
     public class Beacon : IBeacon
     {        
-        public event Delegates.LogEventHandler LogEvent;        
+        public event Delegates.LogEventHandler LogEvent;
 
-        private PublisherSocket _feederSocket;
+        private BeaconCommander _commander;
+        private BeaconFeeder _feeder;
 
-        public IBeaconPort Commander { get; private set; }
+        public int CommandPort { get { return _commander.PortNumber; } }
 
-        public IBeaconPort Feeder { get; private set; }
+        public int FeederPort { get { return _feeder.PortNumber; } }
+
+        public Beacon()
+        {
+            _commander = new BeaconCommander();
+            _feeder = new BeaconFeeder();
+        }
 
         public void Start(int commandServerPort, int feederPort, IBeaconPortAvailability portAvailability)
-        {
-            Commander = new BeaconCommander();
-            StartListening(commandServerPort, Commander, portAvailability.GetAvailableCommandPortNumbers);            
-
-            Feeder = new BeaconFeeder();
-            StartListening(feederPort, Feeder, portAvailability.GetAvailableFeederPortNumbers);
-
+        {            
+            StartOnAvailablePort(commandServerPort, _commander, portAvailability.GetAvailableCommandPortNumbers);                        
+            StartOnAvailablePort(feederPort, _feeder, portAvailability.GetAvailableFeederPortNumbers);
         }                      
 
-        private void StartListening(int assignedPort, IBeaconPort beaconPort, Delegates.GetAvailablePortNumbersHandler portAvailability)
+        private void StartOnAvailablePort(int assignedPort, IBeaconPort beaconPort, Delegates.GetAvailablePortNumbersHandler portAvailability)
         {                        
             int[] availablePortNumbers = null;
             bool hasAvailablePortNumbers = false;
@@ -68,8 +71,13 @@ namespace InvincibleTraderExpertAdvisor
 
         public void Stop()
         {
-            Commander.Stop();
-            Feeder.Stop();
+            _commander.Stop();
+            _feeder.Stop();
+        }
+
+        public void SendTick(long tsDateTime, int tsMilliseconds, double bid, double ask)
+        {
+            _feeder.SendTick(tsDateTime, tsMilliseconds, bid, ask);
         }
     }
 }

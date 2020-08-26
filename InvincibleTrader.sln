@@ -11,6 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderHeartbeatPi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTraderExpertAdvisor.IntegrationTests", "InvincibleTraderExpertAdvisor.IntegrationTests\InvincibleTraderExpertAdvisor.IntegrationTests.csproj", "{554A9567-96C8-4792-B52D-E537C11ACB6A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTrader.Common", "InvincibleTrader.Common\InvincibleTrader.Common.csproj", "{C31CA618-04B6-4F8D-820A-87CA70679E94}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvincibleTrader.Common.UnitTests", "InvincibleTrader.Common.UnitTests\InvincibleTrader.Common.UnitTests.csproj", "{20117E5F-0D89-4755-A710-5C18446A5AD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvincibleTrader.CTrader", "InvincibleTrader.CTrader\InvincibleTrader.CTrader.csproj", "{F48BCF62-435C-493F-AF09-B5E47ABECDBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvincibleTrader.CTrader.IntegrationTests", "InvincibleTrader.CTrader.IntegrationTests\InvincibleTrader.CTrader.IntegrationTests.csproj", "{0D224405-2E8C-4AE5-95AE-DD7DE801A812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +41,22 @@ Global
 		{554A9567-96C8-4792-B52D-E537C11ACB6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{554A9567-96C8-4792-B52D-E537C11ACB6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{554A9567-96C8-4792-B52D-E537C11ACB6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C31CA618-04B6-4F8D-820A-87CA70679E94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C31CA618-04B6-4F8D-820A-87CA70679E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C31CA618-04B6-4F8D-820A-87CA70679E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C31CA618-04B6-4F8D-820A-87CA70679E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20117E5F-0D89-4755-A710-5C18446A5AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20117E5F-0D89-4755-A710-5C18446A5AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20117E5F-0D89-4755-A710-5C18446A5AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20117E5F-0D89-4755-A710-5C18446A5AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F48BCF62-435C-493F-AF09-B5E47ABECDBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F48BCF62-435C-493F-AF09-B5E47ABECDBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F48BCF62-435C-493F-AF09-B5E47ABECDBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F48BCF62-435C-493F-AF09-B5E47ABECDBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D224405-2E8C-4AE5-95AE-DD7DE801A812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D224405-2E8C-4AE5-95AE-DD7DE801A812}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D224405-2E8C-4AE5-95AE-DD7DE801A812}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D224405-2E8C-4AE5-95AE-DD7DE801A812}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

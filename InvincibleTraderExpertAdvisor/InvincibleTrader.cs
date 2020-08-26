@@ -2,7 +2,7 @@
 
 namespace InvincibleTraderExpertAdvisor
 {
-    public class InvincibleTrader
+    public class InvincibleTraderSession
     {
         private ICentralRegistry _centralRegistry;
         private IBeacon _beacon;
@@ -17,7 +17,7 @@ namespace InvincibleTraderExpertAdvisor
 
         public event Delegates.LogEventHandler LogEvent;
 
-        public InvincibleTrader(IUtcClock utcClock, ICentralRegistry centralRegistry, IBeacon beacon, IBackfiller backfiller)
+        public InvincibleTraderSession(IUtcClock utcClock, ICentralRegistry centralRegistry, IBeacon beacon, IBackfiller backfiller)
         {
             _utcClock = utcClock;
             _centralRegistry = centralRegistry;
@@ -30,11 +30,14 @@ namespace InvincibleTraderExpertAdvisor
             _accountId = accountId;
             _sessionId = sessionId;
 
-            ResolveCurrencyPairId(currencyPairName);            
-                        
-            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.Commander.PortNumber, _beacon.Feeder.PortNumber);            
+            ResolveCurrencyPairId(currencyPairName);
 
-            StartBeacon();            
+            var assignedCommandPortNumber = _centralRegistry.ReuseCommandPortNumber(_accountId, _sessionId, _currencyPairId);
+            var assignedFeederPortNumber = _centralRegistry.ReuseFeederPortNumber(_accountId, _sessionId, _currencyPairId);
+
+            _beacon.Start(assignedCommandPortNumber, assignedFeederPortNumber, _centralRegistry);
+
+            _centralRegistry.RegisterSession(_accountId, _sessionId, _currencyPairId, _beacon.CommandPort, _beacon.FeederPort);            
 
             _tickWriter = _centralRegistry.GetTickWriter(_accountId, _currencyPairId);
 
@@ -65,15 +68,18 @@ namespace InvincibleTraderExpertAdvisor
             _beacon.Stop();
         }
 
-        ~InvincibleTrader()
+        ~InvincibleTraderSession()
         {
             _beacon.Stop();
         }
 
-        public void PriceTick()
+        public void PriceTick(long tsDateTime, int tsMilliseconds, double bid, double ask)
         {
-
+            _tickWriter.Write(tsDateTime, tsMilliseconds, bid, ask);
+            _beacon.SendTick(tsDateTime, tsMilliseconds, bid, ask);
         }
+
+        public int PublisherPort {  get { return _beacon.FeederPort; } }
 
         private void ResolveCurrencyPairId(string currencyPairName)
         {
@@ -87,14 +93,6 @@ namespace InvincibleTraderExpertAdvisor
             {
                 throw new Exception("Unable to retrieve currency pair id!");
             }
-        }
-
-        private void StartBeacon()
-        {
-            var assignedCommandPortNumber = _centralRegistry.ReuseCommandPortNumber(_accountId, _sessionId, _currencyPairId);
-            var assignedFeederPortNumber = _centralRegistry.ReuseFeederPortNumber(_accountId, _sessionId, _currencyPairId);
-
-            _beacon.Start(assignedCommandPortNumber, assignedFeederPortNumber, _centralRegistry);            
         }
 
         private void LogMessage(int logLevel, string message)
