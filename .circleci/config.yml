@@ -11,4 +11,5 @@
        - checkout
        - run: dotnet build
        - run: dotnet test -v n --results-directory:test_coverage --collect:"Code Coverage"
-       - store_artifacts: path: C:\Users\circleci\project\test_coverage
+       - store_artifacts:
+            path: C:\Users\circleci\project\test_coverage
