@@ -13,7 +13,7 @@ namespace InvincibleTraderHeartbeatPinger
     {
         static void Main(string[] args)
         {
-            var dbPath = @"D:\InvincibleTrader\registry";
+            var dbPath = args[0];
             var builder = new SQLiteConnectionStringBuilder() { DataSource = $@"{dbPath}\titea_registry.db" };
             var _connection = new SQLiteConnection(builder.ConnectionString);
 

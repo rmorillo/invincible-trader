@@ -21,7 +21,7 @@ namespace InvincibleTrader.CTrader
 
             var strategyName = cTraderAssemblyFullName.Substring(0, cTraderAssemblyFullName.IndexOf(',') - 1);
 
-            var (executionType, accountNumber, sessionType, sessionId) = ParseStrategyName(strategyName);
+            var (executionType, accountNumber, _, _) = ParseStrategyName(strategyName);
 
             if (cTraderAccountNumber != accountNumber)
             {
@@ -62,7 +62,7 @@ namespace InvincibleTrader.CTrader
 
         public void Start(string currencyPairName)
         {            
-            _expertAdvisor = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(_centralRegistryPath), new Beacon(), new Backfiller());
+            _expertAdvisor = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(_centralRegistryPath), new Beacon(), new Backfiller(), null);
             _expertAdvisor.Initialize(AccountId, SessionId, currencyPairName);
 
         }

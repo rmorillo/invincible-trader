@@ -111,5 +111,12 @@ namespace InvincibleTraderExpertAdvisor
                 }
             }
         }
+
+        public void Reset()
+        {
+            Stop();
+            Started = false;
+            PortNumber = 0;
+        }
     }
 }

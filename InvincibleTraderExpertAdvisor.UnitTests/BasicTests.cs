@@ -9,8 +9,7 @@ namespace InvincibleTraderExpertAdvisor.UnitTests
         [Fact]
         public void BasicTest()
         {
-            var ea = new InvincibleTraderSession(null, null, null, null);
-
+            var ea = new InvincibleTraderSession(null, null, null, null, null);
         }
     }
 }

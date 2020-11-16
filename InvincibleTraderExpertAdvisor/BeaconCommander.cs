@@ -61,6 +61,13 @@ namespace InvincibleTraderExpertAdvisor
             }
         }
 
+        public void Reset()
+        {
+            Stop();
+            Started = false;
+            PortNumber = 0;
+        }
+
         private void Ping()
         {
             string message = null;

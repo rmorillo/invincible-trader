@@ -10,6 +10,8 @@ namespace InvincibleTraderExpertAdvisor
         event Delegates.LogEventHandler LogEvent;
         void Start(int commandServerPort);        
         void Stop();
+
+        void Reset();
         bool Started { get; }
     }
 }

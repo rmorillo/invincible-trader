@@ -16,7 +16,8 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                CentralRegistryPath = Environment.GetEnvironmentVariable("INVINCIBLE_TRADER_TEST_REGISTRY_HOME", EnvironmentVariableTarget.Machine);
+                //CentralRegistryPath = Environment.GetEnvironmentVariable("INVINCIBLE_TRADER_TEST_REGISTRY_HOME", EnvironmentVariableTarget.Machine);
+                CentralRegistryPath = @"C:\Users\Ronaldo\.invincible-trader\registry";
             }
             else
             {
@@ -29,7 +30,7 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         [Fact]
         public void BasicFeederTest()
         {
-            var ea = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller());
+            var ea = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller(), null);
 
             ea.LogEvent += (logLevel, message) => { Console.WriteLine($"Log Level: {logLevel}, Message: {message}"); };
 
@@ -71,10 +72,10 @@ namespace InvincibleTraderExpertAdvisor.IntegrationTests
         [Fact]
         public void MultiCurrencyPairSession()
         {
-            var firstCurrency = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller());
+            var firstCurrency = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller(), null);
             firstCurrency.Initialize("0d26339b-204c-4a93-a751-47f00b949509", 1, "EURUSD");
 
-            var secondCurrency = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller());
+            var secondCurrency = new InvincibleTraderSession(new UtcClock(), new SQLiteRegistry(CentralRegistryPath), new Beacon(), new Backfiller(), null);
             secondCurrency.Initialize("0d26339b-204c-4a93-a751-47f00b949509", 1, "GBPUSD");
 
             firstCurrency.WrapUp();

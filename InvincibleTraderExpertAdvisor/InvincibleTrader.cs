@@ -12,17 +12,19 @@ namespace InvincibleTraderExpertAdvisor
         private IUtcClock _utcClock;
         private ITickWriter _tickWriter;
         private IBackfiller _backfiller;
+        private ILogger _logger;
 
         public int LogLevel { get; set; } = 0;
 
         public event Delegates.LogEventHandler LogEvent;
 
-        public InvincibleTraderSession(IUtcClock utcClock, ICentralRegistry centralRegistry, IBeacon beacon, IBackfiller backfiller)
+        public InvincibleTraderSession(IUtcClock utcClock, ICentralRegistry centralRegistry, IBeacon beacon, IBackfiller backfiller, ILogger logger)
         {
             _utcClock = utcClock;
             _centralRegistry = centralRegistry;
             _beacon = beacon;
             _backfiller = backfiller;
+            _logger = logger;
         }
 
         public void Initialize(string accountId, int sessionId, string currencyPairName)
@@ -46,10 +48,11 @@ namespace InvincibleTraderExpertAdvisor
 
         public void StartBackfill()
         {
-            var (success, tsDateTime, tsMilliseconds, bid, ask) = _tickWriter.LastTick;
+            var (success, tsDateTime, tsMilliseconds, _, _) = _tickWriter.LastTick;
 
             var endTime = _utcClock.Now;
-            var startTime = endTime;
+
+            DateTime startTime;
 
             if (success)
             {
@@ -83,7 +86,7 @@ namespace InvincibleTraderExpertAdvisor
 
         private void ResolveCurrencyPairId(string currencyPairName)
         {
-            var (success, message, currencyPairId) = _centralRegistry.GetCurrencyPairIdByName(currencyPairName);
+            var (success, _, currencyPairId) = _centralRegistry.GetCurrencyPairIdByName(currencyPairName);
 
             if (success)
             {

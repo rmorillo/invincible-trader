@@ -2,6 +2,7 @@
 using NetMQ.Sockets;
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace InvincibleTraderExpertAdvisor
@@ -35,7 +36,7 @@ namespace InvincibleTraderExpertAdvisor
             bool hasAvailablePortNumbers = false;
 
             if (assignedPort > 0)
-            {                
+            {
                 beaconPort.Start(assignedPort);
                 if (!beaconPort.Started)
                 {
@@ -56,7 +57,9 @@ namespace InvincibleTraderExpertAdvisor
             {
                 foreach (var portNumber in availablePortNumbers)
                 {
+                    beaconPort.Reset();
                     beaconPort.Start(portNumber);
+                    Thread.Sleep(100);
                     if (beaconPort.Started)
                     {
                         break;
